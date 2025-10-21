@@ -1,0 +1,10 @@
+# .prettierignore
+node_modules
+dist
+coverage
+build
+.eslintcache
+*.lock
+**/*.min.js
+public/*
+src/assets/*
