@@ -2,9 +2,9 @@ name: CI + Deploy Frontend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch: {}
 
 concurrency:
@@ -13,7 +13,7 @@ concurrency:
 
 permissions:
   contents: read
-  id-token: write   # requerido para OIDC
+  id-token: write # requerido para OIDC
 
 jobs:
   build-test:
