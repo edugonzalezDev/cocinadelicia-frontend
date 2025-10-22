@@ -9,6 +9,7 @@
     "format:check": "prettier --check .",
     "dev": "vite",
     "build": "vite build",
+    "test": "vitest run --coverage",
     "preview": "vite preview",
     "lint": "eslint . --ext .js,.jsx",
     "lint:fix": "eslint . --ext .js,.jsx --fix"
@@ -35,9 +36,9 @@
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.5",
-    "typescript": "^5.9.3",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
+    "typescript": "^5.9.3",
     "vite": "^7.1.7"
   }
 }
