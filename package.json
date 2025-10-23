@@ -13,8 +13,8 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx --fix"
   },
   "dependencies": {
     "react": "^19.1.1",
