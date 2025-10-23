@@ -2,34 +2,34 @@
 
 > **Estado:** Sprint 1 · Historia 1 · Versión extendida inicial (documento vivo)
 
-Aplicación web **mobile‑first** para el emprendimiento familiar *Cocina DeLicia*. Este repositorio contiene el **frontend** construido con **React + Vite + TailwindCSS**, enrutamiento con **React Router DOM**, estado global con **Zustand** (planificado) y **Context API** (solo para autenticación más adelante).
+Aplicación web **mobile‑first** para el emprendimiento familiar _Cocina DeLicia_. Este repositorio contiene el **frontend** construido con **React + Vite + TailwindCSS**, enrutamiento con **React Router DOM**, estado global con **Zustand** (planificado) y **Context API** (solo para autenticación más adelante).
 
 ---
 
 ## 🧭 Índice
 
-* [Visión general](#-visión-general)
-* [Stack técnico](#-stack-técnico)
-* [Requisitos previos](#-requisitos-previos)
-* [Instalación y ejecución](#-instalación-y-ejecución)
-* [Scripts](#-scripts)
-* [Variables de entorno](#-variables-de-entorno)
-* [Estructura de carpetas](#-estructura-de-carpetas)
-* [Convenciones y ramas](#-convenciones-y-ramas)
-* [Roadmap breve](#-roadmap-breve)
-* [CI/CD (placeholder)](#-cicd-placeholder)
-* [Despliegue (placeholder)](#-despliegue-placeholder)
-* [Troubleshooting](#-troubleshooting)
-* [Licencia](#-licencia)
-* [Contacto](#-contacto)
+- [Visión general](#-visión-general)
+- [Stack técnico](#-stack-técnico)
+- [Requisitos previos](#-requisitos-previos)
+- [Instalación y ejecución](#-instalación-y-ejecución)
+- [Scripts](#-scripts)
+- [Variables de entorno](#-variables-de-entorno)
+- [Estructura de carpetas](#-estructura-de-carpetas)
+- [Convenciones y ramas](#-convenciones-y-ramas)
+- [Roadmap breve](#-roadmap-breve)
+- [CI/CD (placeholder)](#-cicd-placeholder)
+- [Despliegue (placeholder)](#-despliegue-placeholder)
+- [Troubleshooting](#-troubleshooting)
+- [Licencia](#-licencia)
+- [Contacto](#-contacto)
 
 ---
 
 ## 🎯 Visión general
 
-* **Objetivo:** ofrecer una interfaz rápida y clara para que clientes y administradores gestionen **catálogo, pedidos y estados**.
-* **Dominio previsto (prod):** `https://lacocinadelicia.com` *(por definir)*
-* **Backend API:** endpoint público **por definir** (EC2 / API Gateway, etc.).
+- **Objetivo:** ofrecer una interfaz rápida y clara para que clientes y administradores gestionen **catálogo, pedidos y estados**.
+- **Dominio previsto (prod):** `https://lacocinadelicia.com` _(por definir)_
+- **Backend API:** endpoint público **por definir** (EC2 / API Gateway, etc.).
 
 > Nota: en **Sprint 1** nos enfocamos en la base del repo, estructura, scripts y convenciones. Autenticación con Cognito y stores de Zustand llegarán en sprints siguientes.
 
@@ -37,21 +37,21 @@ Aplicación web **mobile‑first** para el emprendimiento familiar *Cocina DeLic
 
 ## 🧪 Stack técnico
 
-* **Framework:** React 18 + **Vite**
-* **Estilos:** TailwindCSS
-* **Routing:** React Router DOM
-* **Estado global:** Context API (solo Auth en el futuro) + **Zustand** (productos, pedidos, UI)
-* **Build:** Vite
-* **Gestor de paquetes:** **npm**
-* **Testing:** a definir según *Convenciones.md* (Vitest/Testing Library en sprints próximos)
+- **Framework:** React 18 + **Vite**
+- **Estilos:** TailwindCSS
+- **Routing:** React Router DOM
+- **Estado global:** Context API (solo Auth en el futuro) + **Zustand** (productos, pedidos, UI)
+- **Build:** Vite
+- **Gestor de paquetes:** **npm**
+- **Testing:** a definir según _Convenciones.md_ (Vitest/Testing Library en sprints próximos)
 
 ---
 
 ## 🔧 Requisitos previos
 
-* **Node.js** `v24.9`
-* **npm** `v11.6`
-* Git
+- **Node.js** `v24.9`
+- **npm** `v11.6`
+- Git
 
 > Verificá versiones:
 
@@ -145,9 +145,9 @@ src/
 
 ## 🔀 Convenciones y ramas
 
-* **Rama principal:** `main`
-* **Ramas de trabajo:** `feature/<nombre>`, `bugfix/<nombre>`, `hotfix/<nombre>`
-* **Commits:** *Conventional Commits* (ej: `feat: agregar landing básica`)
+- **Rama principal:** `main`
+- **Ramas de trabajo:** `feature/<nombre>`, `bugfix/<nombre>`, `hotfix/<nombre>`
+- **Commits:** _Conventional Commits_ (ej: `feat: agregar landing básica`)
 
 > Ver documento **Convenciones.md** para detalle de estilo, linters y estructura.
 
@@ -155,38 +155,38 @@ src/
 
 ## 🗺️ Roadmap breve
 
-* **Sprint 1:** base del repo, estructura, scripts, landing mínima
-* **Sprint 2:** CRUD pedidos (vista cliente básica)
-* **Sprint 3:** visor de pedidos para chef (lista/Kanban)
-* **Sprint 4:** catálogo público con imágenes (S3)
-* **Sprint 5:** autenticación y roles (Cognito + guarding de rutas)
+- **Sprint 1:** base del repo, estructura, scripts, landing mínima
+- **Sprint 2:** CRUD pedidos (vista cliente básica)
+- **Sprint 3:** visor de pedidos para chef (lista/Kanban)
+- **Sprint 4:** catálogo público con imágenes (S3)
+- **Sprint 5:** autenticación y roles (Cognito + guarding de rutas)
 
-*(Basado en `Plan_Sprints_CocinaDeLicia.md`)*
+_(Basado en `Plan_Sprints_CocinaDeLicia.md`)_
 
 ---
 
 ## 🔄 CI/CD (placeholder)
 
-* **Objetivo:** GitHub Actions → build Vite → deploy a **S3 + CloudFront** (inval cache)
-* **Secrets esperados (placeholder):** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`
-* **Pipeline:** se documentará en Sprint 1/2 cuando se creen los recursos AWS.
+- **Objetivo:** GitHub Actions → build Vite → deploy a **S3 + CloudFront** (inval cache)
+- **Secrets esperados (placeholder):** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`
+- **Pipeline:** se documentará en Sprint 1/2 cuando se creen los recursos AWS.
 
 ---
 
 ## ☁️ Despliegue (placeholder)
 
-* **S3 estático + CloudFront** (dominio `lacocinadelicia.com`)
-* **Pasos:** build → sync a S3 → invalidar CloudFront
-* **Notas:** configurar `SPA fallback` (index.html) para rutas de React Router
+- **S3 estático + CloudFront** (dominio `lacocinadelicia.com`)
+- **Pasos:** build → sync a S3 → invalidar CloudFront
+- **Notas:** configurar `SPA fallback` (index.html) para rutas de React Router
 
 ---
 
 ## 🧰 Troubleshooting
 
-* **Pantalla en blanco / rutas rotas:** verificar SPA fallback en CloudFront/S3
-* **CORS:** asegurar que el backend permite el origen del dominio del frontend
-* **Cache desactualizada:** invalidar distribución de CloudFront tras cada deploy
-* **Variables Vite:** recordar prefijo `VITE_` y reiniciar `npm run dev` tras cambios
+- **Pantalla en blanco / rutas rotas:** verificar SPA fallback en CloudFront/S3
+- **CORS:** asegurar que el backend permite el origen del dominio del frontend
+- **Cache desactualizada:** invalidar distribución de CloudFront tras cada deploy
+- **Variables Vite:** recordar prefijo `VITE_` y reiniciar `npm run dev` tras cambios
 
 ---
 
@@ -198,6 +198,6 @@ Proyecto **privado** por el momento. **All rights reserved © Eduardo González*
 
 ## 📬 Contacto
 
-* Autor: **Eduardo González**
-* Sitio/Portfolio: *(por definir)*
-* Email: *(por definir)*
+- Autor: **Eduardo González**
+- Sitio/Portfolio: _(por definir)_
+- Email: _(por definir)_

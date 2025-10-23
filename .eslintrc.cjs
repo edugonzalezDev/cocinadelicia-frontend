@@ -20,8 +20,8 @@ module.exports = {
     "plugin:react-hooks/recommended",
     "plugin:jsx-a11y/recommended",
     "plugin:@typescript-eslint/recommended",
-    "prettier"
-],
+    "prettier",
+  ],
   settings: {
     react: { version: "detect" },
   },
@@ -32,13 +32,6 @@ module.exports = {
     "react/react-in-jsx-scope": "off", // React 17+ (JSX transform)
     "no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
   },
-  ignorePatterns: [
-    "dist/**",
-    "build/**",
-    "node_modules/**",
-    "coverage/**"
-  ],
-overrides: [
-  { files: ["**/*.ts", "**/*.tsx"], parser: "@typescript-eslint/parser" }
-]
+  ignorePatterns: ["dist/**", "build/**", "node_modules/**", "coverage/**"],
+  overrides: [{ files: ["**/*.ts", "**/*.tsx"], parser: "@typescript-eslint/parser" }],
 };
