@@ -153,6 +153,41 @@ src/
 
 ---
 
+## ✨ Estilo de Código y Commits
+
+- **Formato:** Prettier (al guardar en VS Code y manual/CI).
+- **Linter:** ESLint (con `--max-warnings=0` en CI).
+- **Commits:** Conventional Commits; validamos en CI (push/PR).
+
+### Configuración recomendada de VS Code
+
+Crea `.vscode/settings.json`:
+
+```json
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "prettier.configPath": ".prettierrc.cjs"
+}
+```
+
+Scripts
+
+```bash
+# Local
+npm run format         # prettier --write .
+npm run lint           # eslint . --ext .js,.jsx
+
+# CI (verifica sin modificar archivos)
+npm run format:check   # prettier --check .
+npm run lint:ci        # eslint . --ext .js,.jsx --max-warnings=0
+```
+
+> Hooks de Husky (local) ejecutan lint/format y Commitlint valida el mensaje.
+> En CI, además, se ejecuta commitlint sobre los commits del push/PR.
+
+## Ver detalles en Convenciones.md.
+
 ## 🗺️ Roadmap breve
 
 - **Sprint 1:** base del repo, estructura, scripts, landing mínima
@@ -165,19 +200,45 @@ _(Basado en `Plan_Sprints_CocinaDeLicia.md`)_
 
 ---
 
-## 🔄 CI/CD (placeholder)
+## 🔄 CI/CD
 
-- **Objetivo:** GitHub Actions → build Vite → deploy a **S3 + CloudFront** (inval cache)
-- **Secrets esperados (placeholder):** `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`
-- **Pipeline:** se documentará en Sprint 1/2 cuando se creen los recursos AWS.
+**GitHub Actions** ejecuta:
+
+1. **Commitlint** (push/PR).
+2. **Prettier check** (`npm run format:check`).
+3. **ESLint** (`npm run lint:ci`).
+4. **Tests** (`npm run test` si existe).
+5. **Build** (Vite).
+6. **Deploy a S3** + invalidación de **CloudFront** (OIDC).
+
+### Variables / Secrets (GitHub → Settings)
+
+- **Variables (Repository Variables)**
+  - `AWS_REGION`
+  - `S3_BUCKET`
+  - `CLOUDFRONT_DISTRIBUTION_ID`
+  - `VITE_API_URL` _(si tu build lo lee del entorno)_
+- **Secrets**
+  - `AWS_ROLE_ARN` (rol con OIDC y permisos S3/CloudFront)
+
+> El job de build **falla** si Prettier/ESLint reportan problemas o si commitlint detecta mensajes fuera de convención.
 
 ---
 
-## ☁️ Despliegue (placeholder)
+## ☁️ Despliegue
 
-- **S3 estático + CloudFront** (dominio `lacocinadelicia.com`)
-- **Pasos:** build → sync a S3 → invalidar CloudFront
-- **Notas:** configurar `SPA fallback` (index.html) para rutas de React Router
+**Estrategia:** S3 (estático) + CloudFront.  
+**Caché:**
+
+- Assets: `max-age=31536000, immutable`
+- `index.html`: `no-cache` (evita HTML stale)
+
+**SPA fallback (React Router):** en CloudFront, configurar:
+
+- **404 → 200** a `/index.html`
+- **403 → 200** a `/index.html`
+
+> Tras cada deploy, el workflow invalida `/*` en CloudFront.
 
 ---
 
@@ -187,6 +248,10 @@ _(Basado en `Plan_Sprints_CocinaDeLicia.md`)_
 - **CORS:** asegurar que el backend permite el origen del dominio del frontend
 - **Cache desactualizada:** invalidar distribución de CloudFront tras cada deploy
 - **Variables Vite:** recordar prefijo `VITE_` y reiniciar `npm run dev` tras cambios
+- **Prettier falla en CI**: corré `npm run format` local y commiteá.
+- **ESLint con warnings bloquea CI**: correcciones rápidas con `--fix` y ajustá reglas solo si es necesario.
+- **Rutas del SPA rompen en producción**: verificá que CloudFront tenga las respuestas personalizadas (404/403 → 200 a `/index.html`).
+- **Contenido viejo** tras deploy: confirmá la invalidación de CloudFront o abrí en ventana privada / hard reload.
 
 ---
 
