@@ -1,13 +1,15 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/auth";
 
 export default function PrivateRoute({ allowedRoles }) {
   const { loading, isAuthenticated, roles } = useAuth();
+  const location = useLocation();
 
-  if (loading) return null; // o un spinner
+  if (loading) return null;
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    // guardamos a dónde quería ir para redirigir después del login
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
