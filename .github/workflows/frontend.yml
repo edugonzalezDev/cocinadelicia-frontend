@@ -47,6 +47,17 @@ jobs:
       - name: Test (skip if no script)
         run: npm run -s test --if-present
 
+      - name: Create .env.production
+        run: |
+          cat > .env.production <<'EOF'
+          VITE_AWS_REGION=${{ secrets.VITE_AWS_REGION }}
+          VITE_COGNITO_USER_POOL_ID=${{ secrets.VITE_COGNITO_USER_POOL_ID }}
+          VITE_COGNITO_USER_POOL_CLIENT_ID=${{ secrets.VITE_COGNITO_USER_POOL_CLIENT_ID }}
+          VITE_COGNITO_DOMAIN=${{ secrets.VITE_COGNITO_DOMAIN }}
+          VITE_COGNITO_REDIRECT_SIGNIN=${{ secrets.VITE_COGNITO_REDIRECT_SIGNIN }}
+          VITE_COGNITO_REDIRECT_SIGNOUT=${{ secrets.VITE_COGNITO_REDIRECT_SIGNOUT }}
+          EOF
+
       - name: Build
         env:
           # Variables VITE_* definidas en GitHub → Settings → Variables
