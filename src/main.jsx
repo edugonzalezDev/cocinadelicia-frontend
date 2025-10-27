@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App.jsx";
 import "@/config/amplify";
 
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider } from "@/context/auth";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
