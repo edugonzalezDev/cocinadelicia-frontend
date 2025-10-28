@@ -36,7 +36,7 @@ Amplify.configure({
       loginWith: {
         oauth: {
           domain, // ej: cdd-auth.auth.us-east-1.amazoncognito.com (sin https://)
-          scopes: ["openid", "email"],
+          scopes: ["openid", "email", "profile"],
           redirectSignIn, // <-- arrays
           redirectSignOut, // <-- arrays
           responseType: "code", // PKCE
