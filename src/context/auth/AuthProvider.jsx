@@ -1,3 +1,4 @@
+// src/context/auth/AuthProvider.jsx
 import React, { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { getCurrentUser, fetchAuthSession, signInWithRedirect, signOut } from "aws-amplify/auth";
 import { AuthContext } from "./AuthContext";
@@ -8,46 +9,60 @@ export default function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Guard para no re-sincronizar múltiples veces en la misma sesión/app load.
+  // Evita re-sincronizar múltiples veces en un mismo ciclo de vida de la app
   const syncedOnceRef = useRef(false);
 
   const loadSession = useCallback(async () => {
+    setLoading(true);
     try {
-      // Si no hay sesión, lanza excepción
+      // Si NO hay usuario autenticado, getCurrentUser lanza excepción
       await getCurrentUser();
 
       const session = await fetchAuthSession();
       const idToken = session.tokens?.idToken;
       const accessToken = session.tokens?.accessToken;
 
-      const email = idToken?.payload?.email || accessToken?.payload?.username || null;
-      const sub = idToken?.payload?.sub || accessToken?.payload?.sub;
-      const name = idToken?.payload?.name || null;
-      const givenName = idToken?.payload?.given_name;
-      const familyName = idToken?.payload?.family_name;
-      const phone = idToken?.payload?.phone_number;
+      // Preferimos ID Token para claims de perfil, y fallback a Access Token si hace falta
+      const email =
+        idToken?.payload?.email ||
+        accessToken?.payload?.username || // algunos IdPs ponen el username aquí
+        null;
 
-      // Roles del token (id o access)
-      const groups =
-        idToken?.payload?.["cognito:groups"] || accessToken?.payload?.["cognito:groups"] || [];
+      const sub = idToken?.payload?.sub || accessToken?.payload?.sub || null;
+      const name = idToken?.payload?.name || null;
+      const givenName = idToken?.payload?.given_name || null;
+      const familyName = idToken?.payload?.family_name || null;
+      const phone = idToken?.payload?.phone_number || null;
+
+      // Roles desde "cognito:groups" en cualquiera de los dos tokens
+      const groupsFromId = idToken?.payload?.["cognito:groups"] ?? [];
+      const groupsFromAccess = accessToken?.payload?.["cognito:groups"] ?? [];
+      const rolesSet = new Set(
+        [...groupsFromId, ...groupsFromAccess].map((g) => String(g).toUpperCase()),
+      );
 
       const userData = {
         sub,
         email,
-        name: name || `${givenName || ""} ${familyName || ""}`.trim(),
-        roles: Array.isArray(groups) ? groups.map((g) => g.toUpperCase()) : [],
+        name: name || `${givenName || ""} ${familyName || ""}`.trim() || null,
+        roles: Array.from(rolesSet), // exponer como array
       };
 
       setUser(userData);
       setIsAuthenticated(true);
 
+      if (import.meta.env.DEV) {
+        console.debug("[Auth] Session OK:", {
+          sub: userData.sub,
+          email: userData.email,
+          roles: userData.roles,
+        });
+      }
+
       // ====== Sincronización idempotente con backend ======
       if (!syncedOnceRef.current) {
-        syncedOnceRef.current = true; // marcamos que ya hicimos el intento en esta sesión
+        syncedOnceRef.current = true;
 
-        // El backend toma sub/email/roles del JWT.
-        // Enviamos first/last/phone solo como "complemento opcional".
-        // (Si no vienen en el token, mandamos lo que podamos derivar del name)
         const firstName = givenName || (name ? name.split(" ")[0] : "");
         const lastName = familyName || (name ? name.split(" ").slice(1).join(" ") : "");
 
@@ -59,16 +74,17 @@ export default function AuthProvider({ children }) {
           });
           if (import.meta.env.DEV) console.log("[Auth] Usuario sincronizado en backend");
         } catch (syncError) {
-          // Manejo de conflicto 409 y otros
           if (syncError?.response?.status === 409) {
-            console.warn("[Auth] Email en uso por otro usuario (409). Verificar en BD & Cognito.");
+            console.warn("[Auth] 409: Email ya asociado a otro usuario. Revisar BD/Cognito.");
           } else {
             console.error("[Auth] Error sincronizando usuario:", syncError?.message || syncError);
           }
         }
       }
       // ====== Fin sincronización ======
-    } catch {
+    } catch (e) {
+      // Sin sesión o error → limpiar estado
+      if (import.meta.env.DEV) console.debug("[Auth] Sin sesión activa:", e?.name || e);
       setUser(null);
       setIsAuthenticated(false);
     } finally {
@@ -81,7 +97,7 @@ export default function AuthProvider({ children }) {
   }, [loadSession]);
 
   const login = useCallback(async () => {
-    await signInWithRedirect();
+    await signInWithRedirect(); // requiere Amplify.configure con OAuth
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
@@ -92,7 +108,7 @@ export default function AuthProvider({ children }) {
     await signOut({ global: true });
     setUser(null);
     setIsAuthenticated(false);
-    syncedOnceRef.current = false; // por si el usuario cambia de cuenta
+    syncedOnceRef.current = false; // si cambia de cuenta luego
   }, []);
 
   const value = useMemo(
@@ -108,6 +124,17 @@ export default function AuthProvider({ children }) {
     }),
     [loading, isAuthenticated, user, login, loginWithGoogle, logout, loadSession],
   );
+
+  // Opcional: pantalla mínima de carga si el provider está muy arriba
+  if (loading) {
+    return (
+      <AuthContext.Provider value={value}>
+        <div className="grid min-h-dvh place-items-center">
+          <span className="animate-pulse text-sm text-gray-500">Cargando sesión…</span>
+        </div>
+      </AuthContext.Provider>
+    );
+  }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

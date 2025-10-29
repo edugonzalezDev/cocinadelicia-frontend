@@ -9,7 +9,9 @@
     "format:check": "prettier --check .",
     "dev": "vite",
     "build": "vite build",
-    "test": "vitest run",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "preview": "vite preview",
@@ -21,7 +23,8 @@
     "axios": "^1.12.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4"
+    "react-router-dom": "^7.9.4",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
@@ -36,22 +39,23 @@
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
     "@vitejs/plugin-react": "^5.0.4",
-    "@vitest/coverage-v8": "^4.0.1",
+    "@vitest/coverage-v8": "4.0.4",
     "eslint": "^9.38.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.22",
+    "eslint-plugin-vitest": "^0.5.4",
     "globals": "^16.4.0",
     "husky": "^9.1.7",
     "jsdom": "^27.0.1",
     "lint-staged": "^16.2.5",
     "prettier": "^3.6.2",
     "prettier-plugin-tailwindcss": "^0.7.1",
-    "tailwindcss": "^4.1.15",
+    "tailwindcss": "^4.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.1.7",
-    "vitest": "^4.0.1"
+    "vitest": "4.0.4"
   }
 }

@@ -5,7 +5,13 @@ export default function PrivateRoute({ allowedRoles }) {
   const { loading, isAuthenticated, roles } = useAuth();
   const location = useLocation();
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="grid min-h-dvh place-items-center">
+        <span className="animate-pulse text-sm text-gray-500">Cargando…</span>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     // guardamos a dónde quería ir para redirigir después del login
