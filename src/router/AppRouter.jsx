@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
-import { AuthProvider } from "@/context/auth";
-import PrivateRoute from "./PriveateRoute";
+import PrivateRoute from "./PrivateRoute";
 import PublicOnlyRoute from "./PublicOnlyRoute";
 
 import ClientLayout from "@/layouts/ClientLayout";
@@ -19,42 +18,40 @@ const NotFound = lazy(() => import("@/pages/NotFound")); // crea un stub simple
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Suspense fallback={null /* o <Spinner/> */}>
-          <Routes>
-            <Route element={<ClientLayout />}>
-              <Route path="/" element={<Home />} />
+      <Suspense fallback={null /* o <Spinner/> */}>
+        <Routes>
+          <Route element={<ClientLayout />}>
+            <Route path="/" element={<Home />} />
 
-              {/* Rutas públicas-solo (login, register, etc.) */}
-              <Route element={<PublicOnlyRoute />}>
-                <Route path="/login" element={<Login />} />
-              </Route>
-
-              {/* Cliente autenticado (cualquier rol autenticado) */}
-              <Route element={<PrivateRoute allowedRoles={[]} />}>
-                <Route path="/app" element={<ClientArea />} />
-              </Route>
+            {/* Rutas públicas-solo (login, register, etc.) */}
+            <Route element={<PublicOnlyRoute />}>
+              <Route path="/login" element={<Login />} />
             </Route>
 
-            {/* Chef o Admin */}
-            <Route element={<PrivateRoute allowedRoles={["CHEF", "ADMIN"]} />}>
-              <Route element={<ChefLayout />}>
-                <Route path="/chef" element={<ChefBoard />} />
-              </Route>
+            {/* Cliente autenticado (cualquier rol autenticado) */}
+            <Route element={<PrivateRoute allowedRoles={[]} />}>
+              <Route path="/app" element={<ClientArea />} />
             </Route>
+          </Route>
 
-            {/* Solo Admin */}
-            <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
-              <Route element={<AdminLayout />}>
-                <Route path="/admin" element={<AdminDashboard />} />
-              </Route>
+          {/* Chef o Admin */}
+          <Route element={<PrivateRoute allowedRoles={["CHEF", "ADMIN"]} />}>
+            <Route element={<ChefLayout />}>
+              <Route path="/chef" element={<ChefBoard />} />
             </Route>
+          </Route>
 
-            <Route path="/forbidden" element={<Forbidden />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Suspense>
-      </AuthProvider>
+          {/* Solo Admin */}
+          <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Route>
+          </Route>
+
+          <Route path="/forbidden" element={<Forbidden />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -1,70 +1,127 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
 @import "tailwindcss";
 
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@theme {
+  /* Fuentes */
+  --font-title: "Poppins", sans-serif;
+  --font-body: "Rubik", sans-serif;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Breakpoints */
+  --breakpoint-xs: 440px;
+  /* Color Primario: Verde Menta */
+  --color-primary-100: oklch(0.95 0.02 160);
+  --color-primary-200: oklch(0.87 0.06 160);
+  --color-primary-300: oklch(0.78 0.09 160);
+  --color-primary-400: oklch(0.75 0.11 160);
+  --color-primary-500: oklch(0.72 0.11 160); /* principal */
+  --color-primary-600: oklch(0.65 0.1 160);
+  --color-primary-700: oklch(0.58 0.09 160);
+  --color-primary-800: oklch(0.5 0.07 160);
+  --color-primary-900: oklch(0.42 0.05 160);
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* Color Secundario: Color que haga constraste con el primary y orientado a una aplicacion de cantina escolar */
+  --color-secondary-100: oklch(0.95 0.02 60);
+  --color-secondary-200: oklch(0.87 0.06 60);
+  --color-secondary-300: oklch(0.78 0.09 60);
+  --color-secondary-400: oklch(0.75 0.11 60);
+  --color-secondary-500: oklch(0.72 0.11 60); /* principal */
+  --color-secondary-600: oklch(0.65 0.1 60);
+  --color-secondary-700: oklch(0.58 0.09 60);
+  --color-secondary-800: oklch(0.5 0.07 60);
+  --color-secondary-900: oklch(0.42 0.05 60);
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+  /* Color Terceario: Color que complemente a los 2 anteriores, quizas un tono azulado */
+  --color-tertiary-100: oklch(0.95 0.02 260);
+  --color-tertiary-200: oklch(0.87 0.06 260);
+  --color-tertiary-300: oklch(0.78 0.09 260);
+  --color-tertiary-400: oklch(0.75 0.11 260);
+  --color-tertiary-500: oklch(0.72 0.11 260); /* principal */
+  --color-tertiary-600: oklch(0.65 0.1 260);
+  --color-tertiary-700: oklch(0.58 0.09 260);
+  --color-tertiary-800: oklch(0.5 0.07 260);
+  --color-tertiary-900: oklch(0.42 0.05 260);
+
+  /* Fondo Claro con ligero tono verde */
+  --color-background: oklch(0.97 0.005 160);
+
+  /* Texto Oscuro principal */
+  --color-text: oklch(0.22 0.05 160);
+
+  /* Énfasis y alertas: Naranja */
+  --color-warning: oklch(0.75 0.16 60);
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  padding: 0;
+  box-sizing: border-box;
+  background-color: var(--color-background);
+  font-family: var(--font-body);
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-title);
+}
+/* 
+:root {
+} */
+
+@layer base {
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+@layer utilities {
+  .bg-color-primary-500 {
+    background-color: var(--color-primary-500);
+  }
+  .bg-color-primary-600 {
+    background-color: var(--color-primary-600);
+  }
+  .text-color-text {
+    color: var(--color-text);
+  }
+  .bg-color-background {
+    background-color: var(--color-background);
+  }
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.amplify-button--primary {
+  @apply rounded-md bg-primary-500 px-4 py-2 font-semibold text-white shadow-md hover:bg-primary-700;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.amplify-field {
+  @apply mb-4;
+}
+
+.amplify-input {
+  @apply w-full rounded-md border border-gray-300 p-2 focus:border-secondary-500 focus:outline-none;
+}
+
+.amplify-label {
+  @apply font-semibold text-text;
+}
+
+.amplify-tabs-item {
+  @apply font-bold text-text;
+}
+
+.amplify-tabs-item[data-state="active"] {
+  @apply border-b-2 border-primary-500 text-primary-500;
+}
+
+.amplify-flex.amplify-authenticator__container {
+  @apply overflow-hidden rounded-lg bg-white p-6 shadow-lg;
+}
+
+[data-amplify-router] {
+  --amplify-components-authenticator-router-border-width: 0;
+  @apply rounded;
 }
