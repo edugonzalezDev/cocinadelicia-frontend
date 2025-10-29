@@ -15,7 +15,7 @@ export default function PublicOnlyRoute() {
 
   if (isAuthenticated) {
     // Si ya está logueado, volvemos a donde quiso ir antes o al home/app
-    const from = location.state?.from || "/";
+    const from = location.state?.from || "/app";
     return <Navigate to={from} replace />;
   }
 

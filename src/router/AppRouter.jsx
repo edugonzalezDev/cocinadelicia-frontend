@@ -13,45 +13,51 @@ const Forbidden = lazy(() => import("@/pages/Forbidden"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const ChefBoard = lazy(() => import("@/pages/chef/ChefBoard"));
 const ClientArea = lazy(() => import("@/pages/client/ClientArea"));
-const NotFound = lazy(() => import("@/pages/NotFound")); // crea un stub simple
+const NotFound = lazy(() => import("@/pages/NotFound"));
+
+/** Exportamos las rutas “crudas” para testear con MemoryRouter */
+export function InternalRoutes() {
+  return (
+    <Suspense fallback={<div className="p-6 text-sm text-gray-500">Cargando vista…</div>}>
+      <Routes>
+        <Route element={<ClientLayout />}>
+          <Route path="/" element={<Home />} />
+
+          <Route element={<PublicOnlyRoute />}>
+            <Route path="/login" element={<Login />} />
+          </Route>
+
+          {/* Autenticado (cualquier rol) */}
+          <Route element={<PrivateRoute allowedRoles={[]} />}>
+            <Route path="/app" element={<ClientArea />} />
+          </Route>
+        </Route>
+
+        {/* Chef o Admin */}
+        <Route element={<PrivateRoute allowedRoles={["CHEF", "ADMIN"]} />}>
+          <Route element={<ChefLayout />}>
+            <Route path="/chef" element={<ChefBoard />} />
+          </Route>
+        </Route>
+
+        {/* Solo Admin */}
+        <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+          </Route>
+        </Route>
+
+        <Route path="/forbidden" element={<Forbidden />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </Suspense>
+  );
+}
 
 export default function AppRouter() {
   return (
     <BrowserRouter>
-      <Suspense fallback={null /* o <Spinner/> */}>
-        <Routes>
-          <Route element={<ClientLayout />}>
-            <Route path="/" element={<Home />} />
-
-            {/* Rutas públicas-solo (login, register, etc.) */}
-            <Route element={<PublicOnlyRoute />}>
-              <Route path="/login" element={<Login />} />
-            </Route>
-
-            {/* Cliente autenticado (cualquier rol autenticado) */}
-            <Route element={<PrivateRoute allowedRoles={[]} />}>
-              <Route path="/app" element={<ClientArea />} />
-            </Route>
-          </Route>
-
-          {/* Chef o Admin */}
-          <Route element={<PrivateRoute allowedRoles={["CHEF", "ADMIN"]} />}>
-            <Route element={<ChefLayout />}>
-              <Route path="/chef" element={<ChefBoard />} />
-            </Route>
-          </Route>
-
-          {/* Solo Admin */}
-          <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
-            <Route element={<AdminLayout />}>
-              <Route path="/admin" element={<AdminDashboard />} />
-            </Route>
-          </Route>
-
-          <Route path="/forbidden" element={<Forbidden />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <InternalRoutes />
     </BrowserRouter>
   );
 }

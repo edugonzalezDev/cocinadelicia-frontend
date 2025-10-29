@@ -13,7 +13,7 @@ module.exports = {
     sourceType: "module",
     ecmaFeatures: { jsx: true },
   },
-  plugins: ["react", "react-hooks", "jsx-a11y", "@typescript-eslint"],
+  plugins: ["react", "react-hooks", "jsx-a11y", "@typescript-eslint",],
   extends: [
     "eslint:recommended",
     "plugin:react/recommended",

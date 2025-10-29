@@ -1,13 +1,6 @@
-import AppNav from "@/components/shared/AppNav";
-import { Outlet } from "react-router-dom";
+// src/layouts/ClientLayout.jsx
+import MainLayout from "./MainLayout";
 
 export default function ClientLayout() {
-  return (
-    <div className="min-h-screen">
-      <AppNav />
-      <main className="mx-auto max-w-5xl p-4">
-        <Outlet />
-      </main>
-    </div>
-  );
+  return <MainLayout />;
 }
