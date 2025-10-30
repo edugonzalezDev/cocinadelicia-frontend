@@ -12,6 +12,8 @@ export default function Header() {
   const navigate = useNavigate();
   const { isAuthenticated, user, roles, login, logout } = useAuth();
 
+  const filteredRoles = roles.filter((r) => !r.endsWith("_GOOGLE"));
+
   const navLinkClass = ({ isActive }) => `${linkBase} ${isActive ? linkActive : "text-color-text"}`;
 
   return (
@@ -52,7 +54,8 @@ export default function Header() {
           ) : (
             <div className="flex items-center gap-2">
               <span className="hidden text-xs text-gray-600 lg:inline">
-                {user?.name || user?.email} {roles?.length ? `· ${roles.join(",")}` : ""}
+                {user?.name || user?.email}{" "}
+                {filteredRoles?.length ? `· ${filteredRoles.join(",")}` : ""}
               </span>
               <button
                 onClick={logout}
