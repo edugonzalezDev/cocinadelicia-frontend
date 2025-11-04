@@ -14,6 +14,8 @@ const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
 const ChefBoard = lazy(() => import("@/pages/chef/ChefBoard"));
 const ClientArea = lazy(() => import("@/pages/client/ClientArea"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const NewOrder = lazy(() => import("@/pages/orders/NewOrder"));
+const MyOrders = lazy(() => import("@/pages/orders/MyOrders"));
 
 /** Exportamos las rutas “crudas” para testear con MemoryRouter */
 export function InternalRoutes() {
@@ -30,6 +32,8 @@ export function InternalRoutes() {
           {/* Autenticado (cualquier rol) */}
           <Route element={<PrivateRoute allowedRoles={[]} />}>
             <Route path="/app" element={<ClientArea />} />
+            <Route path="/orders/new" element={<NewOrder />} />
+            <Route path="/orders/mine" element={<MyOrders />} />
           </Route>
         </Route>
 
