@@ -79,6 +79,43 @@ export const useOrderStore = create((set, get) => ({
       throw normalized;
     }
   },
+  fetchAllOrders: async (params = {}) => {
+    const { page = get().page, size = get().size, sort = "createdAt,desc" } = params;
+    set({ isLoading: true, error: null });
+    try {
+      const pageData = await orderService.getAll({ page, size, sort });
+      set({
+        orders: pageData.content ?? [],
+        page: pageData.number ?? page,
+        size: pageData.size ?? size,
+        totalPages: pageData.totalPages ?? 0,
+        totalElements: pageData.totalElements ?? 0,
+        isLoading: false,
+      });
+      return pageData;
+    } catch (err) {
+      const normalized = normalizeApiError(err);
+      set({ error: normalized, isLoading: false });
+      throw normalized;
+    }
+  },
+  updateOrderStatus: async (orderId, nextStatus, note) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updated = await orderService.updateStatus(orderId, { status: nextStatus, note });
+
+      // Actualizar en memoria sin recargar
+      set((state) => ({
+        orders: state.orders.map((o) => (o.id === updated.id ? updated : o)),
+        isLoading: false,
+      }));
+      return updated;
+    } catch (err) {
+      const normalized = normalizeApiError(err);
+      set({ error: normalized, isLoading: false });
+      throw normalized;
+    }
+  },
 
   /**
    * Adds an order to the top of the list (used after creation).
