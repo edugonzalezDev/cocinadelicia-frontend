@@ -12,7 +12,7 @@ const Home = lazy(() => import("@/pages/Home"));
 const Login = lazy(() => import("@/pages/auth/Login"));
 const Forbidden = lazy(() => import("@/pages/Forbidden"));
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
-const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage")); // NUEVO
+const AdminOrdersPage = lazy(() => import("@/pages/admin/AdminOrdersPage"));
 const ChefBoard = lazy(() => import("@/pages/chef/ChefBoard"));
 const ClientArea = lazy(() => import("@/pages/client/ClientArea"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -38,6 +38,7 @@ export function InternalRoutes() {
         <Route element={<PrivateRoute allowedRoles={["CHEF", "ADMIN"]} />}>
           <Route element={<ChefLayout />}>
             <Route path="/chef" element={<ChefBoard />} />
+            <Route path="/chef/orders" element={<AdminOrdersPage />} />
           </Route>
         </Route>
 
@@ -45,7 +46,7 @@ export function InternalRoutes() {
         <Route element={<PrivateRoute allowedRoles={["ADMIN"]} />}>
           <Route element={<AdminLayout />}>
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/orders" element={<AdminOrdersPage />} /> {/* NUEVO */}
+            <Route path="/admin/orders" element={<AdminOrdersPage />} />
           </Route>
         </Route>
 
