@@ -1,12 +1,26 @@
 // src/pages/admin/AdminOrdersPage.jsx
-import React, { useEffect, useMemo, useState } from "react";
-import { useOrderStore } from "@/store/useOrderStore";
 import OrderStatusBadge from "@/components/orders/OrderStatusBadge";
+import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useAdminOrdersStore } from "@/store/useAdminOrdersStore";
+import { orderService } from "@/services/orderService"; // para updateStatus
+
+const ORDER_STATUSES = [
+  "CREATED",
+  "CONFIRMED",
+  "PREPARING",
+  "READY",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+  "CANCELED",
+];
 
 const NEXT_STATUS = {
   CREATED: ["PREPARING", "CANCELED"],
+  CONFIRMED: ["PREPARING", "CANCELED"],
   PREPARING: ["READY", "CANCELED"],
-  READY: ["DELIVERED"], // MVP
+  READY: ["DELIVERED"],
+  OUT_FOR_DELIVERY: ["DELIVERED"],
   DELIVERED: [],
   CANCELED: [],
 };
@@ -24,11 +38,13 @@ function Toast({ open, message, onClose }) {
 }
 
 function StatusModal({ open, onClose, order, onConfirm }) {
-  const options = useMemo(() => NEXT_STATUS[order?.status] ?? [], [order]);
+  const options = useMemo(() => (order ? (NEXT_STATUS[order.status] ?? []) : []), [order]);
   const [value, setValue] = useState(options[0] || "");
+  const [note, setNote] = useState("");
 
   useEffect(() => {
     setValue(options[0] || "");
+    setNote("");
   }, [options, open]);
 
   if (!open || !order) return null;
@@ -60,7 +76,8 @@ function StatusModal({ open, onClose, order, onConfirm }) {
             type="text"
             className="w-full rounded-lg border px-3 py-2 text-sm"
             placeholder="Ej.: Prioridad por horario del cliente"
-            onChange={() => {}}
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
           />
         </div>
 
@@ -69,7 +86,7 @@ function StatusModal({ open, onClose, order, onConfirm }) {
             Cancelar
           </button>
           <button
-            onClick={() => onConfirm(value)}
+            onClick={() => onConfirm({ next: value, note })}
             className="bg-color-primary-500 hover:bg-color-primary-600 rounded-lg px-3 py-1.5 text-sm font-semibold text-white"
           >
             Confirmar
@@ -80,20 +97,111 @@ function StatusModal({ open, onClose, order, onConfirm }) {
   );
 }
 
+function useOrdersQuerySync() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const read = () => {
+    const statusCsv = searchParams.get("status") || "";
+    const status = statusCsv
+      ? statusCsv
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+    const from = searchParams.get("from") || "";
+    const to = searchParams.get("to") || "";
+    const page = Number(searchParams.get("page") || 0);
+    const size = Number(searchParams.get("size") || 20);
+    return { status, from, to, page, size };
+  };
+
+  const write = (state) => {
+    const sp = new URLSearchParams();
+    if (state.status?.length) sp.set("status", state.status.join(","));
+    if (state.from) sp.set("from", state.from);
+    if (state.to) sp.set("to", state.to);
+    sp.set("page", String(state.page ?? 0));
+    sp.set("size", String(state.size ?? 20));
+    setSearchParams(sp, { replace: true });
+  };
+
+  return { read, write };
+}
+
 export default function AdminOrdersPage() {
-  const { orders, fetchAllOrders, updateOrderStatus, isLoading, error, clearError } =
-    useOrderStore();
+  const {
+    orders,
+    filters,
+    pagination,
+    isLoading,
+    error,
+    setFilters,
+    setPage,
+    loadOrders,
+    clearError,
+  } = useAdminOrdersStore();
+
+  const { read, write } = useOrdersQuerySync();
   const [toast, setToast] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState(null);
 
+  // 1) Cargar desde URL al entrar
   useEffect(() => {
-    fetchAllOrders({ page: 0, size: 20, sort: "createdAt,desc" }).catch(() => {});
-  }, [fetchAllOrders]);
+    const q = read();
+    setFilters({ status: q.status, from: q.from, to: q.to });
+    setPage(q.page);
+    loadOrders(q).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 2) Escribir a URL cuando cambien filtros/paginación
+  useEffect(() => {
+    write({
+      status: filters.status,
+      from: filters.from,
+      to: filters.to,
+      page: pagination.page,
+      size: pagination.size,
+    });
+  }, [filters, pagination.page, pagination.size]); // eslint-disable-line
 
   useEffect(() => {
     if (error?.message) setToast(error.message);
   }, [error]);
+
+  const onChangeStatus = (e) => {
+    const values = Array.from(e.target.selectedOptions).map((opt) => opt.value);
+    setFilters({ status: values });
+    setPage(0);
+  };
+
+  const onChangeFrom = (e) => {
+    setFilters({ from: e.target.value });
+    setPage(0);
+  };
+  const onChangeTo = (e) => {
+    setFilters({ to: e.target.value });
+    setPage(0);
+  };
+
+  const onApplyFilters = () => {
+    loadOrders({ page: 0 }).catch(() => {});
+  };
+
+  const goFirst = () => {
+    if (pagination.page > 0) loadOrders({ page: 0 }).catch(() => {});
+  };
+  const goPrev = () => {
+    if (pagination.page > 0) loadOrders({ page: pagination.page - 1 }).catch(() => {});
+  };
+  const goNext = () => {
+    if (pagination.page + 1 < pagination.totalPages)
+      loadOrders({ page: pagination.page + 1 }).catch(() => {});
+  };
+  const goLast = () => {
+    if (pagination.totalPages > 0) loadOrders({ page: pagination.totalPages - 1 }).catch(() => {});
+  };
 
   const openModal = (order) => {
     setSelected(order);
@@ -104,80 +212,207 @@ export default function AdminOrdersPage() {
     setSelected(null);
   };
 
-  const handleConfirm = async (next) => {
+  const handleConfirm = async ({ next, note }) => {
     if (!selected) return;
     try {
-      await updateOrderStatus(selected.id, next, "Cambio manual desde Admin");
+      await orderService.updateStatus(selected.id, { status: next, note: note || "Cambio manual" });
       setToast(`Pedido #${selected.id} → ${next}`);
       closeModal();
+      // refrescar la página actual con filtros vigentes
+      await loadOrders({ page: pagination.page });
     } catch {
-      // El toast de error ya lo maneja el store → state.error
+      // el store ya setea error; mostramos toast de error si hace falta
     }
   };
 
+  const pageLabel = useMemo(() => {
+    const cur = (pagination.page ?? 0) + 1;
+    const total = pagination.totalPages ?? 0;
+    return `${cur} / ${total || 1}`;
+  }, [pagination.page, pagination.totalPages]);
+
+  const totalLabel = useMemo(() => {
+    return `${pagination.totalElements} resultado${(pagination.totalElements || 0) === 1 ? "" : "s"}`;
+  }, [pagination.totalElements]);
+
   return (
-    <div>
-      <header className="mb-4">
+    <div className="space-y-4">
+      <header className="mb-2">
         <h1 className="text-color-text font-title text-xl font-bold">Pedidos</h1>
-        <p className="text-sm text-gray-600">Cambiá el estado sin recargar la página.</p>
+        <p className="text-sm text-gray-600">Filtrá por estado y fecha. Resultados paginados.</p>
       </header>
 
-      {isLoading && <p className="text-sm text-gray-500">Cargando…</p>}
-      {error && (
-        <p className="rounded-md border border-red-200 bg-red-50 p-2 text-sm text-red-700">
-          {error.message}
-        </p>
-      )}
+      {/* Filtros */}
+      <section className="rounded-xl border bg-white p-3 shadow-sm">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Estado (multi) */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Estado (múltiple)
+            </label>
+            <select
+              multiple
+              value={filters.status}
+              onChange={onChangeStatus}
+              className="h-[120px] w-full rounded-lg border px-3 py-2 text-sm"
+            >
+              {ORDER_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
 
-      <ul className="space-y-3">
-        {orders.map((o) => (
-          <li key={o.id} className="rounded-xl border bg-white p-4 shadow-sm">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm text-gray-500">Pedido #{o.id}</p>
-                <p className="text-color-text font-semibold">
-                  Total: {Number(o.totalAmount).toFixed(2)} {o.currency || "UYU"}
-                </p>
-                <p className="text-xs text-gray-500">
-                  {o.createdAt && new Date(o.createdAt).toLocaleString()}
-                </p>
+          {/* From */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Desde</label>
+            <input
+              type="date"
+              value={filters.from}
+              onChange={onChangeFrom}
+              className="w-full rounded-lg border px-3 py-2 text-sm"
+            />
+          </div>
 
-                {o.fulfillment === "DELIVERY" && (
-                  <div className="mt-2 rounded-md bg-gray-50 p-2 text-xs text-gray-700">
-                    <p className="font-semibold">Envío</p>
-                    <p>
-                      {o.shipName} · {o.shipPhone}
-                    </p>
-                    <p>
-                      {o.shipLine1}
-                      {o.shipLine2 ? `, ${o.shipLine2}` : ""} — {o.shipCity}
-                      {o.shipRegion ? `, ${o.shipRegion}` : ""}
-                    </p>
-                  </div>
-                )}
-              </div>
+          {/* To */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">Hasta</label>
+            <input
+              type="date"
+              value={filters.to}
+              onChange={onChangeTo}
+              className="w-full rounded-lg border px-3 py-2 text-sm"
+            />
+          </div>
 
-              <div className="text-right">
-                <OrderStatusBadge status={o.status} />
-                {(NEXT_STATUS[o.status] ?? []).length > 0 && (
-                  <button
-                    onClick={() => openModal(o)}
-                    className="mt-2 rounded-lg border px-3 py-1.5 text-sm"
-                  >
-                    Cambiar estado
-                  </button>
-                )}
-              </div>
-            </div>
-          </li>
-        ))}
+          {/* Botones */}
+          <div className="flex items-end gap-2">
+            <button
+              onClick={onApplyFilters}
+              className="bg-color-primary-500 hover:bg-color-primary-600 rounded-lg px-4 py-2 text-sm font-semibold text-white"
+            >
+              Aplicar filtros
+            </button>
+            <button
+              onClick={() => {
+                setFilters({ status: [], from: "", to: "" });
+                setPage(0);
+                loadOrders({ status: [], from: "", to: "", page: 0 }).catch(() => {});
+              }}
+              className="rounded-lg border px-4 py-2 text-sm"
+            >
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </section>
 
-        {!isLoading && orders.length === 0 && (
-          <li className="rounded-xl border bg-white p-6 text-center text-sm text-gray-600">
-            No hay pedidos para mostrar.
-          </li>
+      {/* Tabla */}
+      <section className="rounded-xl border bg-white p-0 shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="bg-gray-50 text-left text-xs text-gray-600 uppercase">
+              <tr>
+                <th className="px-4 py-3">ID</th>
+                <th className="px-4 py-3">Cliente</th>
+                <th className="px-4 py-3">Estado</th>
+                <th className="px-4 py-3">Total</th>
+                <th className="px-4 py-3">Fecha</th>
+                <th className="px-4 py-3">Envío</th>
+                <th className="px-4 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.map((o) => (
+                <tr key={o.id} className="border-t">
+                  <td className="px-4 py-3 font-medium text-gray-800">#{o.id}</td>
+                  <td className="px-4 py-3">
+                    {o.shipName || "-"} {o.shipPhone ? `· ${o.shipPhone}` : ""}
+                  </td>
+                  <td className="px-4 py-3">
+                    <OrderStatusBadge status={o.status} />
+                  </td>
+                  <td className="px-4 py-3">
+                    {Number(o.totalAmount ?? 0).toFixed(2)} {o.currency || "UYU"}
+                  </td>
+                  <td className="px-4 py-3">
+                    {o.createdAt ? new Date(o.createdAt).toLocaleString() : "-"}
+                  </td>
+                  <td className="px-4 py-3">
+                    {o.fulfillment === "DELIVERY"
+                      ? `${o.shipLine1 || ""}${o.shipLine2 ? `, ${o.shipLine2}` : ""} — ${o.shipCity || ""}`
+                      : "RETIRA"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {(NEXT_STATUS[o.status] ?? []).length > 0 && (
+                      <button
+                        onClick={() => openModal(o)}
+                        className="rounded-lg border px-3 py-1.5 text-xs"
+                      >
+                        Cambiar estado
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+
+              {!isLoading && orders.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                    No hay pedidos para mostrar.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {isLoading && <div className="px-4 py-3 text-sm text-gray-500">Cargando…</div>}
+
+        {error && (
+          <div className="border-t border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error.message}
+          </div>
         )}
-      </ul>
+      </section>
+
+      {/* Paginación + indicador total */}
+      <section className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-sm text-gray-600">
+          Página {pageLabel} — {totalLabel}
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={goFirst}
+            disabled={pagination.page <= 0 || isLoading}
+            className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            « Primero
+          </button>
+          <button
+            onClick={goPrev}
+            disabled={pagination.page <= 0 || isLoading}
+            className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            ‹ Anterior
+          </button>
+          <button
+            onClick={goNext}
+            disabled={pagination.page + 1 >= pagination.totalPages || isLoading}
+            className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            Siguiente ›
+          </button>
+          <button
+            onClick={goLast}
+            disabled={pagination.page + 1 >= pagination.totalPages || isLoading}
+            className="rounded-lg border px-3 py-1.5 text-sm disabled:opacity-50"
+          >
+            Última »
+          </button>
+        </div>
+      </section>
 
       <StatusModal
         open={modalOpen}

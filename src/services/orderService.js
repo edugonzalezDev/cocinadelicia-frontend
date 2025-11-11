@@ -24,16 +24,9 @@ async function getMyOrders(params = {}) {
   return data;
 }
 
-// NUEVO: listado global para admin/chef
-async function getAll(params = {}) {
-  const { page = 0, size = 20, sort = "createdAt,desc" } = params;
-  const { data } = await apiClient.get("/orders", { params: { page, size, sort } });
-  return data; // Page<OrderResponse>
-}
-
 async function updateStatus(orderId, { status, note }) {
   const { data } = await apiClient.patch(`/orders/${orderId}/status`, { status, note });
   return data; // OrderResponse
 }
 
-export const orderService = { createOrder, getMyOrders, getAll, updateStatus };
+export const orderService = { createOrder, getMyOrders, updateStatus };
