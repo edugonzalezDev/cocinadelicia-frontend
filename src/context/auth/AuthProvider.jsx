@@ -32,7 +32,6 @@ export default function AuthProvider({ children }) {
       const name = idToken?.payload?.name || null;
       const givenName = idToken?.payload?.given_name || null;
       const familyName = idToken?.payload?.family_name || null;
-      const phone = idToken?.payload?.phone_number || null;
 
       // Roles desde "cognito:groups" en cualquiera de los dos tokens
       const groupsFromId = idToken?.payload?.["cognito:groups"] ?? [];
@@ -62,23 +61,17 @@ export default function AuthProvider({ children }) {
       // ====== Sincronización idempotente con backend ======
       if (!syncedOnceRef.current) {
         syncedOnceRef.current = true;
-
-        const firstName = givenName || (name ? name.split(" ")[0] : "");
-        const lastName = familyName || (name ? name.split(" ").slice(1).join(" ") : "");
-
         try {
-          await api.post("/users/register", {
-            firstName: firstName || undefined,
-            lastName: lastName || undefined,
-            phone: phone || undefined,
-          });
-          if (import.meta.env.DEV) console.log("[Auth] Usuario sincronizado en backend");
+          // Nuevo: consulta/sincroniza perfil app_user (crea si no existe)
+          await api.get("/users/me");
+          if (import.meta.env.DEV)
+            console.log("[Auth] Usuario sincronizado en backend vía /api/users/me");
         } catch (syncError) {
-          if (syncError?.response?.status === 409) {
-            console.warn("[Auth] 409: Email ya asociado a otro usuario. Revisar BD/Cognito.");
-          } else {
-            console.error("[Auth] Error sincronizando usuario:", syncError?.message || syncError);
-          }
+          // 401/403 serán manejados por el interceptor (redirige a /login)
+          console.error(
+            "[Auth] Error sincronizando usuario (/api/users/me):",
+            syncError?.message || syncError,
+          );
         }
       }
       // ====== Fin sincronización ======
